@@ -1,0 +1,95 @@
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+class Matrix {
+private:
+    vector<vector<int>> data;
+
+public:
+    // Read matrix interactively
+    void readMatrix(const string &name = "Matrix") {
+        data.clear();
+        string line;
+        cout << "Enter elements of " << name
+             << " (rows separated by Enter, end with an empty line):\n";
+
+        while (true) {
+            getline(cin, line);
+            if (line.empty()) break;
+
+            istringstream iss(line);
+            vector<int> row;
+            int val;
+            while (iss >> val)
+                row.push_back(val);
+
+            if (!data.empty() && row.size() != data[0].size()) {
+                cerr << "Error: all rows must have the same number of columns.\n";
+                data.clear();
+                return;
+            }
+
+            if (!row.empty())
+                data.push_back(row);
+        }
+
+        if (data.empty())
+            cerr << "Warning: no data entered for " << name << ".\n";
+    }
+
+    int rows() const { return data.size(); }
+    int cols() const { return data.empty() ? 0 : data[0].size(); }
+
+    // Display function matching your first code’s output style
+    void display(const string &title) const {
+        cout << "\n" << title << ":\n";
+        for (const auto &r : data) {
+            for (int val : r)
+                cout << setw(5) << val;
+            cout << endl;
+        }
+    }
+
+    // Operator overloading for addition
+    Matrix operator+(const Matrix &m) const {
+        if (rows() != m.rows() || cols() != m.cols()) {
+            throw runtime_error("Error: matrices must have the same dimensions for addition.");
+        }
+
+        Matrix result;
+        result.data = data;
+        for (int i = 0; i < rows(); ++i)
+            for (int j = 0; j < cols(); ++j)
+                result.data[i][j] += m.data[i][j];
+        return result;
+    }
+};
+
+int main() {
+    Matrix A, B;
+
+    cout << "Enter Matrix A:\n";
+    A.readMatrix("Matrix A");
+
+    cout << "\nEnter Matrix B:\n";
+    B.readMatrix("Matrix B");
+
+    if (A.rows() == 0 || B.rows() == 0) {
+        cerr << "Invalid input: One or both matrices are empty.\n";
+        return 1;
+    }
+
+    if (A.rows() != B.rows() || A.cols() != B.cols()) {
+        cerr << "Error: Matrices must have the same dimensions.\n";
+        return 1;
+    }
+
+    Matrix C = A + B;
+    C.display("A + B");
+
+    return 0;
+}
